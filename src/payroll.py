@@ -1,10 +1,7 @@
-class Employee:
-    def __init__(self, name):
-        self.name = name
-        self.id = id(self)
-    
-    # def __str__(self):
-    #     return f'{self.name}'
+from employees.employee import Employee
+from employees.hourly import *
+from employees.salaried import *
+
 
 def menu():
     print("Escolha uma opção:")
@@ -40,15 +37,22 @@ def main():
     #     exit
 
     #print(employeelist)
-    employeelist.append(Employee("jao"))
-    employeelist.append(Employee("ze"))
-    employeelist.append(Employee("chico"))
-    for obj in employeelist: 
-        print( obj.name, obj.id, sep =' ' ) 
+    # employeelist.append(Employee("jao"))
+    # employeelist.append(Employee("ze"))
+    # employeelist.append(Employee("chico"))
+    # for obj in employeelist: 
+    #     print( obj.name, obj.id, sep =' ' ) 
 
     # removeEmployee(employeelist, 'jao')
     # for obj in employeelist: 
     #     print( obj.name, obj.id, sep =' ' ) 
     
-main()
+e1 = Employee('jao', "madureira", "Horista")
+e2 = Hourly('ze', "friburgo", "Horista", 500, 1.04)
+e3 = Salaried('figo', "porto", "Assalariad", 5000)
+
+print(e3)
+print(e3.salary)
+
+
     
