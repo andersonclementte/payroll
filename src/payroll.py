@@ -1,6 +1,6 @@
 from employees.employee import Employee
-from employees.hourly import *
-from employees.salaried import *
+from employees.hourly import Hourly
+from employees.salaried import Salaried, Comissioned
 
 
 def menu():
@@ -47,13 +47,12 @@ def main():
     # for obj in employeelist: 
     #     print( obj.name, obj.id, sep =' ' ) 
     
-e1 = Employee('jao', "madureira", "Horista")
+#e1 = Employee('jao', "madureira", "Horista")
 e2 = Hourly('ze', "friburgo", "Horista", 500, 1.04)
 e3 = Salaried('figo', "porto", "Assalariad", 5000)
 e4 = Comissioned("tiao", "mcz", "Comissionado", 2000, 140)
 
 print(e4)
-print(e4.bonus)
-
+#print(e4.bonus)
 
     
