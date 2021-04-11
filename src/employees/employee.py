@@ -1,4 +1,6 @@
-class Employee:
+from abc import ABC, abstractmethod
+class Employee(ABC):
+    @abstractmethod
     def __init__(self, name, address, kind):
         self.name = name
         self.id = id(self)
