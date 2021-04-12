@@ -2,6 +2,15 @@ from employees.employee import Employee
 from employees.hourly import Hourly
 from employees.salaried import Salaried, Comissioned
 
+keysCache = []
+lastId = 0
+
+def getId():
+    global lastId
+    lastId += 1
+    return lastId
+
+
 def clearScreen():
     print("\n")
     print("\n")
@@ -29,27 +38,25 @@ def employeeChoose():
     return int(ans)
 
 #listParameter
-def insertHourly(listPar):
+def insertHourly():
     #e2 = Hourly('ze', "friburgo", 500, 1.04)
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
     salary = float(input("Digite o salario: "))
 
     employee = Hourly(name, address, salary)
-    listPar.append(employee)
-    return listPar
+    return employee
 
-def insertSalaried(listPar):
+def insertSalaried():
 #e3 = Salaried('figo', "porto", 5000)
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
     salary = float(input("Digite o salario: "))
 
     employee = Salaried(name, address, salary)
-    listPar.append(employee)
-    return listPar
+    return employee
 
-def insertComissioned(listPar):
+def insertComissioned():
     # e4 = Comissioned("tiao", "mcz", 2000, 140)
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
@@ -57,34 +64,37 @@ def insertComissioned(listPar):
     bonus = float(input("Digite o bônus: "))
 
     employee = Comissioned(name, address, salary, bonus)
-    listPar.append(employee)
-    return listPar
+    return employee
 
-def addEmployee(listPar):
+def addEmployee():
     employeeAns = employeeChoose()
 
     if employeeAns == 1:
-       listPar = insertHourly(listPar)
+       employee = insertHourly()
     elif employeeAns == 2:
-        listPar = insertSalaried(listPar)
+        employee = insertSalaried()
     elif employeeAns == 3:
-        listPar = insertComissioned(listPar)
+        employee = insertComissioned()
     else:
         print("Saindo...")
         exit
     
-    return listPar
+    return employee
 
-def removeEmployee(listPar, idPar):
+def removeEmployee(listPar):
     pass
             
 
 
 def main():
     employeelist = []
+    employeeDict = {}
+    value = getId()
+
     menuoption = menu()
+
     if menuoption == 1:
-       employeelist = addEmployee(employeelist)
+        employeeDict[value] = addEmployee()
     elif menuoption == 2:
         removeEmployee()
     else:
@@ -92,7 +102,7 @@ def main():
         exit
 
     clearScreen()
-    print(employeelist[0])
+    print(employeeDict[1])
     # employeelist.append(Employee("jao"))
     # employeelist.append(Employee("ze"))
     # employeelist.append(Employee("chico"))
