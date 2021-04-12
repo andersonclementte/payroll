@@ -12,11 +12,7 @@ def getId():
 
 
 def clearScreen():
-    print("\n")
-    print("\n")
-    print("\n")
-    print("\n")
-
+    print("\n\n\n\n")
 
 def menu():
     print("Escolha uma opção:")
