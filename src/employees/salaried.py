@@ -17,9 +17,15 @@ class Comissioned(Salaried):
         super().__init__(name, address, salary)
         self.kind = "Comissionado"
         self._bonus = bonus
+        self.date = None
+        self.value = None
+
+    def SalesReport(self, date, value):
+        self.date = date
+        self.value = value
 
     def __str__(self):
-        return super().__str__()
-
-# g1 = Comissioned("carlos", "Colina", 4000, 500)
-# print(g1)
+        if (bool(self.date)):
+            return super().__str__() + 'Resultado de vendas:\nData: {}\nValor {}\n'.format(self.date, self.value)
+        else:
+            return super().__str__()
