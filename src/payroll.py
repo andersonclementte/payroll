@@ -19,9 +19,10 @@ def menu():
     print("Escolha uma opção:")
     print("(1) - Adicionar Funcionário")
     print("(2) - Remover Funcionário")
-    print("(3) - Estatisticas de funcionários")
-    print("(4) - Encontrar Funcionário")
-    print("(5) - Exibir Ids Disponíveis")
+    print("(3) - Exibir quantidade de funcionários cadastrados")
+    print("(4) - Encontrar Funcionário por ID")
+    print("(5) - Exibir Ids deletadas e proxima id")
+    print("(6) - Lançar cartão de ponto")
     print("(0) - Sair")
     ans = input()
     return int(ans)
@@ -32,7 +33,7 @@ def employeeChoose():
     print("(1) - Horista")
     print("(2) - Assalariado")
     print("(3) - Comissionado")
-    print("(0) - Sair")
+    print("(0) - Cancelar")
     ans = input()
     return int(ans)
 
@@ -72,18 +73,14 @@ def insertComissioned():
     clear()
     return employee
 
-def addEmployee():
-    employeeAns = employeeChoose()
+def addEmployee(option):
 
-    if employeeAns == 1:
+    if option == 1:
        employee = insertHourly()
-    elif employeeAns == 2:
+    elif option == 2:
         employee = insertSalaried()
-    elif employeeAns == 3:
+    elif option == 3:
         employee = insertComissioned()
-    else:
-        print("Saindo...")
-        exit
     
     return employee
 
@@ -121,7 +118,19 @@ def globalParameters():
     print("Id deletadas: {}".format(deletedIds))
     #print(deletedIds)
     print("Proxima id livre: {}".format(lastId+1))
-            
+
+def sendTimeCard(dictionary):
+    clear()
+    key = int(input("Digite o Id do funcionario: "))
+    if (dictionary[key].kind != "Horista"):
+        print("Id inválida, funcionário não horista.")
+        print("-------------------------------------")
+    else:
+        print("Funcionário:",format(dictionary[key].name))
+        hours = float(input("Digite as horas trabalhadas: "))
+        dictionary[key].TimeCard(hours)
+        print("Cartão submetido com sucesso.")
+        print("-----------------------------")
 
 
 def main():
@@ -132,7 +141,14 @@ def main():
         menuoption = menu()
         if menuoption == 1:
             value = getId()
-            employeeDict[value] = addEmployee()
+            employeeOption = employeeChoose()
+            if (employeeOption != 0):
+                employeeDict[value] = addEmployee(employeeOption)
+                print("Operação bem sucedida, Id do funcionário: %d" %value)
+                print("------------------------------")
+            else:
+                print("Voltando...")
+                print("------------------------------")
         elif menuoption == 2:
             removeEmployee(employeeDict)
         elif menuoption == 3:
@@ -141,6 +157,12 @@ def main():
             findEmployee(employeeDict)
         elif menuoption == 5:
             globalParameters()
+        elif menuoption == 6:
+            if(len(employeeDict) > 0):
+                sendTimeCard(employeeDict)
+            else:
+                print("A folha de pagamento está vazia")
+                print("------------------------------")
         else:
             print("Saindo...")
             break
