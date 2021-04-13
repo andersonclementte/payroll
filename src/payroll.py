@@ -23,9 +23,10 @@ def menu():
     print("(4) - Encontrar Funcionário por ID")
     print("(5) - Exibir Ids deletadas e proxima id")
     print("(6) - Lançar cartão de ponto")
+    print("(7) - Lançar resultado de vendas")
     print("(0) - Sair")
-    ans = input()
-    return int(ans)
+    ans = int(input())
+    return ans
 
 def employeeChoose():
     clear()
@@ -34,8 +35,8 @@ def employeeChoose():
     print("(2) - Assalariado")
     print("(3) - Comissionado")
     print("(0) - Cancelar")
-    ans = input()
-    return int(ans)
+    ans = int(input())
+    return ans
 
 def insertHourly():
     #e2 = Hourly('ze', "friburgo", 500, 1.04)
@@ -67,8 +68,8 @@ def insertComissioned():
     print("Adição de funcionário comissionado:")
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
-    salary = float(input("Digite o salario: "))
-    bonus = float(input("Digite o bônus: "))
+    salary = float(input("Digite o salario:"))
+    bonus = float(input("Digite o bônus:"))
     employee = Comissioned(name, address, salary, bonus)
     clear()
     return employee
@@ -132,6 +133,20 @@ def sendTimeCard(dictionary):
         print("Cartão submetido com sucesso.")
         print("-----------------------------")
 
+def sendSalesReport(dictionary):
+    clear()
+    key = int(input("Digite o Id do funcionario: "))
+    if (dictionary[key].kind != "Comissionado"):
+        print("Id inválida, funcionário não comissionado.")
+        print("------------------------------------------")
+    else:
+        print("Funcionário:",format(dictionary[key].name))
+        dateTime = input("Digite a data: ")
+        value = float(input("Digite o valor: "))
+        dictionary[key].SalesReport(dateTime, value)
+        print("Resultado de vendas submetido com sucesso.")
+        print("------------------------------------------")
+
 
 def main():
     employeeDict = {}
@@ -160,6 +175,12 @@ def main():
         elif menuoption == 6:
             if(len(employeeDict) > 0):
                 sendTimeCard(employeeDict)
+            else:
+                print("A folha de pagamento está vazia")
+                print("------------------------------")
+        elif menuoption == 7:
+            if(len(employeeDict) > 0):
+                sendSalesReport(employeeDict)
             else:
                 print("A folha de pagamento está vazia")
                 print("------------------------------")
