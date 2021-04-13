@@ -8,9 +8,12 @@ deletedIds = []
 lastId = 0
 
 def getId():
-    global lastId
-    lastId += 1
-    return lastId
+    if (len(deletedIds) > 0):
+        return deletedIds.pop(0) #return first item in list and deletes it
+    else:
+        global lastId
+        lastId += 1
+        return lastId
 
 def menu():
     print("Escolha uma opção:")
@@ -18,6 +21,7 @@ def menu():
     print("(2) - Remover Funcionário")
     print("(3) - Estatisticas de funcionários")
     print("(4) - Encontrar Funcionário")
+    print("(5) - Exibir Ids Disponíveis")
     print("(0) - Sair")
     ans = input()
     return int(ans)
@@ -41,6 +45,7 @@ def insertHourly():
     salary = float(input("Digite o salario: "))
     employee = Hourly(name, address, salary)
     clear()
+
     return employee
 
 def insertSalaried():
@@ -52,6 +57,7 @@ def insertSalaried():
     salary = float(input("Digite o salario: "))
     employee = Salaried(name, address, salary)
     clear()
+
     return employee
 
 def insertComissioned():
@@ -81,10 +87,17 @@ def addEmployee():
     
     return employee
 
-def removeEmployee():
+def removeEmployee(dictionary):
     clear()
-    print("Desculpe, ainda não foi implementado :)")
-    exit
+    key = int(input("Digite o ID do funcionário: "))
+    if (key not in dictionary):
+        print("Id inválida, nenhum funcionário deletado.")
+        return dictionary
+    else:
+        deletedIds.append(key)
+        del dictionary[key]
+        print("Operação bem sucedida, funcionário deletado.")
+        return dictionary
 
 def employeeStats(dictionary):
     clear()
@@ -94,10 +107,20 @@ def employeeStats(dictionary):
         print("A folha de pagamento contém %d funcionários(as).\n" %len(dictionary))
 
 def findEmployee(dictionary):
+    clear()
     key = int(input("Digite o ID do funcionário: "))
-    print("------------------------------")
-    print(dictionary[key])
-    print("------------------------------")
+    if (key not in dictionary):
+        print("ID inválida.")
+    else:
+        print("------------------------------")
+        print(dictionary[key])
+        print("------------------------------")
+
+def globalParameters():
+    clear()
+    print("Id deletadas: {}".format(deletedIds))
+    #print(deletedIds)
+    print("Proxima id livre: {}".format(lastId+1))
             
 
 
@@ -111,11 +134,13 @@ def main():
             value = getId()
             employeeDict[value] = addEmployee()
         elif menuoption == 2:
-            removeEmployee()
+            removeEmployee(employeeDict)
         elif menuoption == 3:
             employeeStats(employeeDict)
         elif menuoption == 4:
-            findEmployee(employeeDict)#notimplemented
+            findEmployee(employeeDict)
+        elif menuoption == 5:
+            globalParameters()
         else:
             print("Saindo...")
             break
