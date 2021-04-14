@@ -1,6 +1,7 @@
 from employees.employee import Employee
 from employees.hourly import Hourly
 from employees.salaried import Salaried, Comissioned
+from employees.salesReport import SalesReport
 from os import system
 
 #new branch hello world
@@ -26,6 +27,7 @@ def menu():
     print("(5) - Exibir Ids deletadas e proxima id")
     print("(6) - Lançar cartão de ponto")
     print("(7) - Lançar resultado de vendas")
+    print("(8) - Ver resultado de venda")
     print("(0) - Sair")
     ans = int(input())
     return ans
@@ -70,8 +72,8 @@ def insertComissioned():
     print("Adição de funcionário comissionado:")
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
-    salary = float(input("Digite o salario:"))
-    bonus = float(input("Digite o bônus:"))
+    salary = float(input("Digite o salario: "))
+    bonus = float(input("Digite o bônus: "))
     employee = Comissioned(name, address, salary, bonus)
     clear()
     return employee
@@ -94,9 +96,10 @@ def removeEmployee(dictionary):
         print("Id inválida, nenhum funcionário deletado.")
         return dictionary
     else:
+        name = dictionary[key]['worker'].name
         deletedIds.append(key)
         del dictionary[key]
-        print("Operação bem sucedida, funcionário deletado.")
+        print("Operação bem sucedida, funcionário {} deletado.".format(name))
         return dictionary
 
 def employeeStats(dictionary):
@@ -113,7 +116,9 @@ def findEmployee(dictionary):
         print("ID inválida.")
     else:
         print("------------------------------")
-        print(dictionary[key])
+        print(dictionary[key]['worker'])
+        if (dictionary[key]['worker'].kind == 'Comissionado'):
+            print("Sales report: {}".format(len(dictionary[key]['sales'])))
         print("------------------------------")
 
 def globalParameters():
@@ -125,82 +130,117 @@ def globalParameters():
 def sendTimeCard(dictionary):
     clear()
     key = int(input("Digite o Id do funcionario: "))
-    if (dictionary[key].kind != "Horista"):
+    if (key not in dictionary):
+        print("ID inválida.")
+        print("------------------------------")
+        #return
+    elif (dictionary[key]['worker'].kind != "Horista"):
         print("Id inválida, funcionário não horista.")
         print("-------------------------------------")
     else:
-        print("Funcionário:",format(dictionary[key].name))
+        print("Funcionário:",format(dictionary[key]['worker'].name))
         hours = float(input("Digite as horas trabalhadas: "))
         dictionary[key].TimeCard(hours)
         print("Cartão submetido com sucesso.")
         print("-----------------------------")
 
+
 def sendSalesReport(dictionary):
     clear()
     key = int(input("Digite o Id do funcionario: "))
-    if (dictionary[key].kind != "Comissionado"):
+    if (key not in dictionary):
+        print("ID inválida.")
+        print("------------------------------")
+        #return
+
+    elif (dictionary[key]['worker'].kind != "Comissionado"):
         print("Id inválida, funcionário não comissionado.")
         print("------------------------------------------")
     else:
-        print("Funcionário:",format(dictionary[key].name))
+        print("Funcionário:",format(dictionary[key]['worker'].name))
         dateTime = input("Digite a data: ")
         value = float(input("Digite o valor: "))
-        dictionary[key].SalesReport(dateTime, value)
+        saleReport = SalesReport(dateTime, value)
+        dictionary[key]['sales'].append(saleReport)
         print("Resultado de vendas submetido com sucesso.")
         print("------------------------------------------")
+    
+
+def showSaleReport(dictionary):
+    clear()
+    key = int(input("Digite o Id do funcionario: "))
+    if (key not in dictionary):
+        print("ID inválida.")
+        print("------------------------------")
+        return
+    elif (dictionary[key]['worker'].kind != "Comissionado"):
+        print("Id inválida, funcionário não comissionado.")
+        print("------------------------------------------")
+    else:
+        print("Funcionário:",format(dictionary[key]['worker'].name))
+        print("Resultados de vendas: %d" %len(dictionary[key]['sales']))
+        print("Ultimo resultado de venda: ")
+        print(dictionary[key]['sales'][-1])
+        print("--------------------------")
+
 
 
 def main():
     employeeDict = {}
-    
+
 
     while True:
         menuoption = menu()
+        
         if menuoption == 1:
+            individualDict = {}
             value = getId()
             employeeOption = employeeChoose()
             if (employeeOption != 0):
-                employeeDict[value] = addEmployee(employeeOption)
+                if (employeeOption == 3):
+                    individualDict['sales'] = []
+                individualDict['worker'] = addEmployee(employeeOption)
+                employeeDict[value] = individualDict
                 print("Operação bem sucedida, Id do funcionário: %d" %value)
                 print("------------------------------")
             else:
                 print("Voltando...")
                 print("------------------------------")
+
         elif menuoption == 2:
             removeEmployee(employeeDict)
+
         elif menuoption == 3:
-            employeeStats(employeeDict)
+            employeeStats(employeeDict) 
+
         elif menuoption == 4:
             findEmployee(employeeDict)
+
         elif menuoption == 5:
             globalParameters()
+
         elif menuoption == 6:
             if(len(employeeDict) > 0):
                 sendTimeCard(employeeDict)
             else:
                 print("A folha de pagamento está vazia")
                 print("------------------------------")
+
         elif menuoption == 7:
             if(len(employeeDict) > 0):
                 sendSalesReport(employeeDict)
             else:
                 print("A folha de pagamento está vazia")
                 print("------------------------------")
+        
+        elif menuoption == 8:
+            showSaleReport(employeeDict)
+
         else:
             print("Saindo...")
             break
+    
 
-    # clearScreen()
-    # print(employeeDict[1])
-
+   
 main()
-
-# e1 = Employee('jao', "madureira")
-#e2 = Hourly('ze', "friburgo", 500, 1.04)
-#e3 = Salaried('figo', "porto", 5000)
-# e4 = Comissioned("tiao", "mcz", 2000, 140)
-
-# print(e4)
-#print(e4.bonus)
-
     
