@@ -2,6 +2,7 @@ from employees.employee import Employee
 from employees.hourly import Hourly
 from employees.salaried import Salaried, Comissioned
 from employees.salesReport import SalesReport
+from union.union import Union
 from os import system
 
 #new branch hello world
@@ -9,6 +10,7 @@ from os import system
 clear = lambda: system('clear')
 deletedIds = []
 lastId = 0
+unionID = 0
 
 def getId():
     if (len(deletedIds) > 0):
@@ -18,13 +20,18 @@ def getId():
         lastId += 1
         return lastId
 
+def getUnionId():
+    global unionID
+    unionID += 1
+    return lastId
+
 def menu():
     print("Escolha uma opção:")
     print("(1) - Adicionar Funcionário")
     print("(2) - Remover Funcionário")
     print("(3) - Exibir quantidade de funcionários cadastrados")
     print("(4) - Encontrar Funcionário por ID")
-    print("(5) - Exibir Ids deletadas e proxima id")
+    print("(5) - Adicionar ao sindicato")
     print("(6) - Lançar cartão de ponto")
     print("(7) - Lançar resultado de vendas")
     print("(8) - Ver resultado de venda")
@@ -42,10 +49,11 @@ def employeeChoose():
     ans = int(input())
     return ans
 
+
 def insertHourly():
     #e2 = Hourly('ze', "friburgo", 500, 1.04)
     clear()
-    print("Adição de funcionário Horista:")
+    print("Registro de funcionário Horista:")
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
     salary = float(input("Digite o salario: "))
@@ -57,7 +65,7 @@ def insertHourly():
 def insertSalaried():
 #e3 = Salaried('figo', "porto", 5000)
     clear()
-    print("Adição de funcionário assalariado:")
+    print("Registro de funcionário assalariado:")
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
     salary = float(input("Digite o salario: "))
@@ -69,7 +77,7 @@ def insertSalaried():
 def insertComissioned():
     # e4 = Comissioned("tiao", "mcz", 2000, 140)
     clear()
-    print("Adição de funcionário comissionado:")
+    print("Regitro de funcionário comissionado:")
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
     salary = float(input("Digite o salario: "))
@@ -109,7 +117,7 @@ def employeeStats(dictionary):
     else:
         print("A folha de pagamento contém %d funcionários(as).\n" %len(dictionary))
 
-def findEmployee(dictionary):
+def findEmployee(dictionary, uniondict):
     clear()
     key = int(input("Digite o ID do funcionário: "))
     if (key not in dictionary):
@@ -119,7 +127,20 @@ def findEmployee(dictionary):
         print(dictionary[key]['worker'])
         if (dictionary[key]['worker'].kind == 'Comissionado'):
             print("Sales report: {}".format(len(dictionary[key]['sales'])))
+        if ('unionKey' in dictionary[key]):
+            print("Empregado sindicalista.")
         print("------------------------------")
+
+def unionStatus(dictUnion):
+    key = int(input("Digite o ID do funcionário: "))
+    if (key not in dictUnion):
+        print("ID inválida.")
+    else:
+        print("------------------------------")
+        print(dictUnion[key])
+        print("------------------------------")
+
+
 
 def globalParameters():
     clear()
@@ -187,6 +208,7 @@ def showSaleReport(dictionary):
 
 def main():
     employeeDict = {}
+    unionDict = {}
 
 
     while True:
@@ -197,15 +219,29 @@ def main():
             value = getId()
             employeeOption = employeeChoose()
             if (employeeOption != 0):
+
                 if (employeeOption == 3):
                     individualDict['sales'] = []
+                
                 individualDict['worker'] = addEmployee(employeeOption)
+                
+                    
+                unionOption = input("Deseja entrar no sindicato? (S/N)")
+                if (unionOption == 's' or unionOption == 'S'):
+                    unionId = getUnionId()
+                    individualDict['unionKey'] = unionId
+                    unionDict[unionId] = Union(unionId)
+                    print("Funcionario filiado ao sindicado. ID numero {}". format(unionID))
+                else:
+                    print("Funcionário não filiado ao sindicato.")
+
                 employeeDict[value] = individualDict
                 print("Operação bem sucedida, Id do funcionário: %d" %value)
                 print("------------------------------")
             else:
                 print("Voltando...")
                 print("------------------------------")
+
 
         elif menuoption == 2:
             removeEmployee(employeeDict)
@@ -214,7 +250,8 @@ def main():
             employeeStats(employeeDict) 
 
         elif menuoption == 4:
-            findEmployee(employeeDict)
+            findEmployee(employeeDict, unionDict)
+
 
         elif menuoption == 5:
             globalParameters()
