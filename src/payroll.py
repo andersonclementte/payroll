@@ -160,7 +160,7 @@ def sendTimeCard(dictionary):
     else:
         print("Funcionário:",format(dictionary[key]['worker'].name))
         hours = float(input("Digite as horas trabalhadas: "))
-        dictionary[key].TimeCard(hours)
+        dictionary[key]['worker'].TimeCard(hours)
         print("Cartão submetido com sucesso.")
         print("-----------------------------")
 
@@ -228,6 +228,10 @@ def sendUnionFee(dictionary, unionDic):
             print("Empregado não sindicalizado.")
         else:
             print("Id sindical: %d" %dictionary[key]['unionKey'])
+            value = float(input("Digite o valor da taxa:"))
+            unionDic[dictionary[key]['unionKey']].incrementFee(value)
+            print("Taxa adicionada com sucesso.")
+
 
 
 
@@ -307,4 +311,3 @@ def main():
 
    
 main()
-    
