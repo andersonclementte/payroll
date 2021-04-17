@@ -35,6 +35,7 @@ def menu():
     print("(6) - Lançar cartão de ponto")
     print("(7) - Lançar resultado de vendas")
     print("(8) - Ver resultado de venda")
+    print("(9) - Lançar taxa de serviço")
     print("(0) - Sair")
     ans = int(input())
     return ans
@@ -48,7 +49,6 @@ def employeeChoose():
     print("(0) - Cancelar")
     ans = int(input())
     return ans
-
 
 def insertHourly():
     #e2 = Hourly('ze', "friburgo", 500, 1.04)
@@ -128,7 +128,8 @@ def findEmployee(dictionary, uniondict):
         if (dictionary[key]['worker'].kind == 'Comissionado'):
             print("Sales report: {}".format(len(dictionary[key]['sales'])))
         if ('unionKey' in dictionary[key]):
-            print("Empregado sindicalista.")
+            print("Empregado sindicalizado.")
+            print(uniondict[ dictionary[key]['unionKey'] ])
         print("------------------------------")
 
 def unionStatus(dictUnion):
@@ -139,8 +140,6 @@ def unionStatus(dictUnion):
         print("------------------------------")
         print(dictUnion[key])
         print("------------------------------")
-
-
 
 def globalParameters():
     clear()
@@ -165,7 +164,6 @@ def sendTimeCard(dictionary):
         print("Cartão submetido com sucesso.")
         print("-----------------------------")
 
-
 def sendSalesReport(dictionary):
     clear()
     key = int(input("Digite o Id do funcionario: "))
@@ -186,7 +184,6 @@ def sendSalesReport(dictionary):
         print("Resultado de vendas submetido com sucesso.")
         print("------------------------------------------")
     
-
 def showSaleReport(dictionary):
     clear()
     key = int(input("Digite o Id do funcionario: "))
@@ -203,6 +200,34 @@ def showSaleReport(dictionary):
         print("Ultimo resultado de venda: ")
         print(dictionary[key]['sales'][-1])
         print("--------------------------")
+
+def addToUnion(dictionary, unionDic):
+    clear()
+    key = int(input("Digite o Id do funcionario: "))
+    if (key not in dictionary):
+        print("ID inválida.")
+        print("------------------------------")
+    else:
+        if ('unionKey' in dictionary[key]):
+            print("Funcionário já sindicalizado.")
+        else:
+            unionId = getUnionId()
+            dictionary[key]['unionKey'] = unionId
+            unionDic[unionId] = Union(unionId)
+            print("Funcionario filiado ao sindicado. ID  sindical número {}". format(unionID))
+
+
+def sendUnionFee(dictionary, unionDic):
+    clear()
+    key = int(input("Digite o Id do funcionario: "))
+    if (key not in dictionary):
+        print("ID inválida.")
+        print("------------------------------")
+    else:
+        if ('unionKey' not in dictionary[key]):
+            print("Empregado não sindicalizado.")
+        else:
+            print("Id sindical: %d" %dictionary[key]['unionKey'])
 
 
 
@@ -231,7 +256,7 @@ def main():
                     unionId = getUnionId()
                     individualDict['unionKey'] = unionId
                     unionDict[unionId] = Union(unionId)
-                    print("Funcionario filiado ao sindicado. ID numero {}". format(unionID))
+                    print("Funcionario filiado ao sindicado. ID sindical numero {}". format(unionID))
                 else:
                     print("Funcionário não filiado ao sindicato.")
 
@@ -252,19 +277,18 @@ def main():
         elif menuoption == 4:
             findEmployee(employeeDict, unionDict)
 
-
         elif menuoption == 5:
-            globalParameters()
+            addToUnion(employeeDict, unionDict)
 
         elif menuoption == 6:
-            if(len(employeeDict) > 0):
+            if (len(employeeDict) > 0):
                 sendTimeCard(employeeDict)
             else:
                 print("A folha de pagamento está vazia")
                 print("------------------------------")
 
         elif menuoption == 7:
-            if(len(employeeDict) > 0):
+            if (len(employeeDict) > 0):
                 sendSalesReport(employeeDict)
             else:
                 print("A folha de pagamento está vazia")
@@ -272,6 +296,9 @@ def main():
         
         elif menuoption == 8:
             showSaleReport(employeeDict)
+
+        elif menuoption == 9:
+            sendUnionFee(employeeDict, unionDict)
 
         else:
             print("Saindo...")
