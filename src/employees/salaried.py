@@ -5,6 +5,11 @@ class Salaried(Employee):
         super().__init__(name, address)
         self.kind = "Assalariado"
         self._salary = salary
+
+    def EditSalaried(self, name, address, salary):
+        self.name = name
+        self.address = address
+        self._salary = salary
     
     def __str__(self):
         return super().__str__() + 'Tipo de empregado: {}'.format(self.kind)
@@ -23,6 +28,12 @@ class Comissioned(Salaried):
     # def SalesReport(self, date, value):
     #     self.date = date
     #     self.value = value
+
+    def EditComissioned(self, name, address, salary, bonus):
+        self.name = name
+        self.address = address
+        self.salary = salary
+        self.bonus = bonus
 
     def __str__(self):
     #     if (bool(self.date)):

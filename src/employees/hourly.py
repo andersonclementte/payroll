@@ -16,7 +16,12 @@ class Hourly(Employee):
             self.workedHours += hours
         else:
             self.workedHours += 8
-            self.workedExtraHours += (hours - 8) 
+            self.workedExtraHours += (hours - 8)
+    
+    def EditHourly(self, name, address, salary):
+        self.name = name
+        self.address = address
+        self._salary = salary
     
 
     def __str__(self):
