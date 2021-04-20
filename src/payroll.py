@@ -12,6 +12,7 @@ deletedIds = []
 lastId = 0
 unionID = 0
 
+#Add employee block
 def getId():
     if (len(deletedIds) > 0):
         return deletedIds.pop(0) #return first item in list and deletes it
@@ -36,6 +37,7 @@ def menu():
     print("(7) - Lançar resultado de vendas")
     print("(8) - Ver resultado de venda")
     print("(9) - Lançar taxa de serviço")
+    print("(10) - Editar funcionário")
     print("(0) - Sair")
     ans = int(input())
     return ans
@@ -63,7 +65,7 @@ def insertHourly():
     return employee
 
 def insertSalaried():
-#e3 = Salaried('figo', "porto", 5000)
+    #e3 = Salaried('figo', "porto", 5000)
     clear()
     print("Registro de funcionário assalariado:")
     name = input("Digite o nome: ")
@@ -96,7 +98,9 @@ def addEmployee(option):
         employee = insertComissioned()
     
     return employee
+#add employee end block
 
+#remove employee block
 def removeEmployee(dictionary):
     clear()
     key = int(input("Digite o ID do funcionário: "))
@@ -109,6 +113,7 @@ def removeEmployee(dictionary):
         del dictionary[key]
         print("Operação bem sucedida, funcionário {} deletado.".format(name))
         return dictionary
+#end of remove employee block
 
 def employeeStats(dictionary):
     clear()
@@ -233,6 +238,130 @@ def sendUnionFee(dictionary, unionDic):
             print("Taxa adicionada com sucesso.")
 
 
+#Edit employee block
+def editEmployeeOptions():
+    clear()
+    print("Escolha uma opção:")
+    print("(1) - Editar dados pessoais")
+    print("(2) - Editar tipo de funcionário")
+    print("(3) - Alterar vinculo sindical")
+    print("(0) - Cancelar")
+    ans = int(input())
+    return ans
+
+def changePersonalData(dictionary, key):
+    newName = input("Digite o novo nome: ")
+    newAddress = input("Digite o novo endereço: ")
+    newSalary = float(input("Digite o novo salário: "))
+    if (dictionary[key]['worker'].kind == 'Horista'):
+        dictionary[key]['worker'].EditHourly(newName, newAddress, newSalary)
+        print("Funcionário editado com sucesso.")
+        print("--------------------------------")
+
+    elif (dictionary[key]['worker'].kind == 'Assalariado'):
+        dictionary[key]['worker'].EditSalaried(newName, newAddress, newSalary)
+        print("Funcionário editado com sucesso.")
+        print("--------------------------------")
+
+    elif (dictionary[key]['worker'].kind == 'Comissionado'):
+        newBonus = float(input("Digite o novo bonus: "))
+        dictionary[key]['worker'].EditComissioned(newAddress, newAddress, newSalary, newBonus)
+        print("Funcionário editado com sucesso.")
+        print("--------------------------------")
+
+def changeToHourly(dictionary, key):
+    name = dictionary[key]['worker'].name
+    address = dictionary[key]['worker'].address
+    salary = dictionary[key]['worker']._salary
+    editedEmployee = Hourly(name, address, salary)
+    dictionary[key]['worker'] = editedEmployee
+    print("Tipo de funcionário editado com sucesso!")
+    print(dictionary[key]['worker'])
+
+def changeToSalaried(dictionary, key):
+    name = dictionary[key]['worker'].name
+    address = dictionary[key]['worker'].address
+    salary = dictionary[key]['worker']._salary
+    editedEmployee = Salaried(name, address, salary)
+    dictionary[key]['worker'] = editedEmployee
+    print("Tipo de funcionário editado com sucesso!")
+    print(dictionary[key]['worker'])
+
+def changeToComissioned(dictionary, key):
+    name = dictionary[key]['worker'].name
+    address = dictionary[key]['worker'].address
+    salary = dictionary[key]['worker']._salary
+    bonus = float(input("Digite o bônus do funcionário: "))
+    editedEmployee = Comissioned(name, address, salary, bonus)
+    dictionary[key]['worker'] = editedEmployee
+    print("Tipo de funcionário editado com sucesso!")
+    print(dictionary[key]['worker'])
+
+
+
+
+def changeEmployeeType(dictionary, key):
+    if (dictionary[key]['worker'].kind == 'Horista'):
+        print("Escolha o novo tipo para o funcionário: ")
+        print("(1) - Comissionado")
+        print("(2) - Assalariado")
+        choose = int(input())
+        if (choose == 1):
+            changeToComissioned(dictionary, key)
+        elif (choose == 2):
+            changeToSalaried(dictionary, key)
+        else:
+            print("Cancelando...")
+        
+
+    elif (dictionary[key]['worker'].kind == 'Assalariado'):
+        print("Escolha o novo tipo para o funcionário: ")
+        print("(1) - Comissionado")
+        print("(2) - Horista")
+        choose = int(input())
+        if (choose == 1):
+            changeToComissioned(dictionary, key)
+        elif (choose == 2):
+            changeToHourly(dictionary, key)
+        else:
+            print("Cancelando...")
+        
+
+    elif (dictionary[key]['worker'].kind == 'Comissionado'):
+        print("Escolha o novo tipo para o funcionário: ")
+        print("(1) - Horista")
+        print("(2) - Assalariado")
+        choose = int(input())
+        if (choose == 1):
+            changeToHourly(dictionary, key)
+        elif (choose == 2):
+            changeToSalaried(dictionary, key)
+        else:
+            print("Cancelando...")
+
+
+def editEmployee(dictionary, unionDic):
+    clear()
+    print("Atenção, editar um funcionário pode invalidar alguns atributos previamente configurados.")
+    res = input("Deseja continuar? (S/n)")
+    if (res == 's' or res == 'S'):
+        key = int(input("Digite o Id do funcionario: "))
+        if (key not in dictionary):
+            print("ID inválida.")
+            print("------------------------------")
+        else:
+            option = editEmployeeOptions()
+            if (option == 1):
+                changePersonalData(dictionary, key)
+            elif (option == 2):
+                changeEmployeeType(dictionary, key)
+    else:
+        print("Cancelando...")
+
+
+    
+
+
 
 
 def main():
@@ -303,6 +432,9 @@ def main():
 
         elif menuoption == 9:
             sendUnionFee(employeeDict, unionDict)
+
+        elif menuoption == 10:
+            editEmployee(employeeDict, unionDict)
 
         else:
             print("Saindo...")
