@@ -7,4 +7,4 @@ class Union:
         self.fee += increment
 
     def __str__(self):
-        return 'Sindicalista numero {}\nTaxa sindical: R${}'.format(self.key, self.fee)
+        return 'ID Sindical: {}\nTaxa sindical: R${}'.format(self.key, self.fee)
