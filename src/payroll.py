@@ -24,7 +24,7 @@ def getId():
 def getUnionId():
     global unionID
     unionID += 1
-    return lastId
+    return unionID
 
 def menu():
     print("Escolha uma opção:")
@@ -128,14 +128,18 @@ def findEmployee(dictionary, uniondict):
     if (key not in dictionary):
         print("ID inválida.")
     else:
-        print("------------------------------")
+        print("--------------------------------")
         print(dictionary[key]['worker'])
         if (dictionary[key]['worker'].kind == 'Comissionado'):
             print("Sales report: {}".format(len(dictionary[key]['sales'])))
+        print("--------------------------------")
+        print("Informações sindicais:")
         if ('unionKey' in dictionary[key]):
             print("Empregado sindicalizado.")
             print(uniondict[ dictionary[key]['unionKey'] ])
-        print("------------------------------")
+        else:
+            print("Empregado não sindicalizado.")
+        print("--------------------------------")
 
 def unionStatus(dictUnion):
     key = int(input("Digite o ID do funcionário: "))
@@ -221,7 +225,6 @@ def addToUnion(dictionary, unionDic):
             unionDic[unionId] = Union(unionId)
             print("Funcionario filiado ao sindicado. ID  sindical número {}". format(unionID))
 
-
 def sendUnionFee(dictionary, unionDic):
     clear()
     key = int(input("Digite o Id do funcionario: "))
@@ -236,7 +239,6 @@ def sendUnionFee(dictionary, unionDic):
             value = float(input("Digite o valor da taxa:"))
             unionDic[dictionary[key]['unionKey']].incrementFee(value)
             print("Taxa adicionada com sucesso.")
-
 
 #Edit employee block
 def editEmployeeOptions():
@@ -297,9 +299,6 @@ def changeToComissioned(dictionary, key):
     print("Tipo de funcionário editado com sucesso!")
     print(dictionary[key]['worker'])
 
-
-
-
 def changeEmployeeType(dictionary, key):
     if (dictionary[key]['worker'].kind == 'Horista'):
         print("Escolha o novo tipo para o funcionário: ")
@@ -339,7 +338,20 @@ def changeEmployeeType(dictionary, key):
         else:
             print("Cancelando...")
 
-
+def changeUnionStatus(dictionary, key, unionDic):
+    if ('unionKey' in dictionary[key]): 
+        unionID = dictionary[key]['unionKey']
+        del unionDic[unionID]
+        del dictionary[key]['unionKey']
+        #print("Funcionário {} foi removido do sindicato".format(dictionary[key]['worker'].name))
+        print("Removido do sindicato.")
+        
+    else:
+        unionId = getUnionId()
+        dictionary[key]['unionKey'] = unionId
+        unionDic[unionId] = Union(unionId)
+        print("Funcionario filiado ao sindicado. ID sindical numero {}". format(unionId))
+           
 def editEmployee(dictionary, unionDic):
     clear()
     print("Atenção, editar um funcionário pode invalidar alguns atributos previamente configurados.")
@@ -355,12 +367,82 @@ def editEmployee(dictionary, unionDic):
                 changePersonalData(dictionary, key)
             elif (option == 2):
                 changeEmployeeType(dictionary, key)
+            elif (option == 3):
+                changeUnionStatus(dictionary, key, unionDic)
     else:
         print("Cancelando...")
 
+def openPayRoll(employeeDict, unionDict):
+        while True:
+            menuoption = menu()
+            
+            if menuoption == 1:
+                individualDict = {}
+                value = getId()
+                employeeOption = employeeChoose()
+                if (employeeOption != 0):
 
-    
+                    if (employeeOption == 3):
+                        individualDict['sales'] = []
+                    
+                    individualDict['worker'] = addEmployee(employeeOption)
+                    
+                        
+                    unionOption = input("Deseja entrar no sindicato? (S/N)")
+                    if (unionOption == 's' or unionOption == 'S'):
+                        unionId = getUnionId()
+                        individualDict['unionKey'] = unionId
+                        unionDict[unionId] = Union(unionId)
+                        print("Funcionario filiado ao sindicado. ID sindical numero {}". format(unionId))
+                    else:
+                        print("Funcionário não filiado ao sindicato.")
 
+                    employeeDict[value] = individualDict
+                    print("Operação bem sucedida, Id do funcionário: %d" %value)
+                    print("------------------------------")
+                else:
+                    print("Voltando...")
+                    print("------------------------------")
+
+
+            elif menuoption == 2:
+                removeEmployee(employeeDict)
+
+            elif menuoption == 3:
+                employeeStats(employeeDict) 
+
+            elif menuoption == 4:
+                findEmployee(employeeDict, unionDict)
+
+            elif menuoption == 5:
+                addToUnion(employeeDict, unionDict)
+
+            elif menuoption == 6:
+                if (len(employeeDict) > 0):
+                    sendTimeCard(employeeDict)
+                else:
+                    print("A folha de pagamento está vazia")
+                    print("------------------------------")
+
+            elif menuoption == 7:
+                if (len(employeeDict) > 0):
+                    sendSalesReport(employeeDict)
+                else:
+                    print("A folha de pagamento está vazia")
+                    print("------------------------------")
+            
+            elif menuoption == 8:
+                showSaleReport(employeeDict)
+
+            elif menuoption == 9:
+                sendUnionFee(employeeDict, unionDict)
+
+            elif menuoption == 10:
+                editEmployee(employeeDict, unionDict)
+
+            else:
+                print("Saindo...")
+                break
 
 
 
@@ -368,77 +450,10 @@ def main():
     employeeDict = {}
     unionDict = {}
 
-
-    while True:
-        menuoption = menu()
-        
-        if menuoption == 1:
-            individualDict = {}
-            value = getId()
-            employeeOption = employeeChoose()
-            if (employeeOption != 0):
-
-                if (employeeOption == 3):
-                    individualDict['sales'] = []
-                
-                individualDict['worker'] = addEmployee(employeeOption)
-                
-                    
-                unionOption = input("Deseja entrar no sindicato? (S/N)")
-                if (unionOption == 's' or unionOption == 'S'):
-                    unionId = getUnionId()
-                    individualDict['unionKey'] = unionId
-                    unionDict[unionId] = Union(unionId)
-                    print("Funcionario filiado ao sindicado. ID sindical numero {}". format(unionID))
-                else:
-                    print("Funcionário não filiado ao sindicato.")
-
-                employeeDict[value] = individualDict
-                print("Operação bem sucedida, Id do funcionário: %d" %value)
-                print("------------------------------")
-            else:
-                print("Voltando...")
-                print("------------------------------")
+    openPayRoll(employeeDict, unionDict)
 
 
-        elif menuoption == 2:
-            removeEmployee(employeeDict)
-
-        elif menuoption == 3:
-            employeeStats(employeeDict) 
-
-        elif menuoption == 4:
-            findEmployee(employeeDict, unionDict)
-
-        elif menuoption == 5:
-            addToUnion(employeeDict, unionDict)
-
-        elif menuoption == 6:
-            if (len(employeeDict) > 0):
-                sendTimeCard(employeeDict)
-            else:
-                print("A folha de pagamento está vazia")
-                print("------------------------------")
-
-        elif menuoption == 7:
-            if (len(employeeDict) > 0):
-                sendSalesReport(employeeDict)
-            else:
-                print("A folha de pagamento está vazia")
-                print("------------------------------")
-        
-        elif menuoption == 8:
-            showSaleReport(employeeDict)
-
-        elif menuoption == 9:
-            sendUnionFee(employeeDict, unionDict)
-
-        elif menuoption == 10:
-            editEmployee(employeeDict, unionDict)
-
-        else:
-            print("Saindo...")
-            break
+    
     
 
    
