@@ -1,3 +1,4 @@
+import datetime as dt
 from employees.employee import Employee
 from employees.hourly import Hourly
 from employees.salaried import Salaried, Comissioned
@@ -5,12 +6,12 @@ from employees.salesReport import SalesReport
 from union.union import Union
 from os import system
 
-#new branch hello world
-
+#global variables and stuff
 clear = lambda: system('clear')
 deletedIds = []
 lastId = 0
 unionID = 0
+today = dt.datetime(2021,1,1)
 
 #Add employee block
 def getId():
@@ -115,6 +116,16 @@ def removeEmployee(dictionary):
         return dictionary
 #end of remove employee block
 
+#payment method block
+def choosePaymentMethod():
+    clear()
+    print("Escolha uma opção:")
+    print("(1) - Deposito em conta")
+    print("(2) - Cheque em mãos")
+    print("(3) - Cheque pelos correios")
+    ans = int(input())
+    return ans
+
 def employeeStats(dictionary):
     clear()
     if len(dictionary) == 1:
@@ -122,7 +133,7 @@ def employeeStats(dictionary):
     else:
         print("A folha de pagamento contém %d funcionários(as).\n" %len(dictionary))
 
-def findEmployee(dictionary, uniondict):
+def findEmployee(dictionary, uniondict, schedule):
     clear()
     key = int(input("Digite o ID do funcionário: "))
     if (key not in dictionary):
@@ -132,7 +143,15 @@ def findEmployee(dictionary, uniondict):
         print(dictionary[key]['worker'])
         if (dictionary[key]['worker'].kind == 'Comissionado'):
             print("Sales report: {}".format(len(dictionary[key]['sales'])))
+            
+        if key in schedule['weekly']:
+            print("Funcionário pago semanalmente")
+        elif key in schedule['bi-weekly']:
+            print("Funcionário pago bi-semanalmente")
+        elif key in schedule['monthly']:
+            print("Funcionário pago mensalmente")
         print("--------------------------------")
+
         print("Informações sindicais:")
         if ('unionKey' in dictionary[key]):
             print("Empregado sindicalizado.")
@@ -247,6 +266,7 @@ def editEmployeeOptions():
     print("(1) - Editar dados pessoais")
     print("(2) - Editar tipo de funcionário")
     print("(3) - Alterar vinculo sindical")
+    print("(4) - Alterar agenda de pagamentos")
     print("(0) - Cancelar")
     ans = int(input())
     return ans
@@ -351,8 +371,37 @@ def changeUnionStatus(dictionary, key, unionDic):
         dictionary[key]['unionKey'] = unionId
         unionDic[unionId] = Union(unionId)
         print("Funcionario filiado ao sindicado. ID sindical numero {}". format(unionId))
-           
-def editEmployee(dictionary, unionDic):
+
+def shedulePaymentOptions():
+    clear()
+    print("Escolha uma opção:")
+    print("(1) - Pagamento semanal")
+    print("(2) - Pagamento bi-semanal")
+    print("(3) - Pagamento mensal")
+    print("(0) - Cancelar")
+    ans = int(input())
+    return ans
+
+def changePaymentSchedule(option, key, shedule):
+    if key in shedule['weekly']:
+        shedule['weekly'].remove(key)
+    if key in shedule['bi-weekly']:
+        shedule['bi-weekly'].remove(key)
+    if key in shedule['monthly']:
+        shedule['monthly'].remove(key)
+
+    if(option == 1):
+        shedule['weekly'].add(key)
+    elif (option == 2):
+        shedule['bi-weekly'].add(key)
+    elif (option == 3):
+        shedule['monthly'].add(key)
+
+
+
+
+
+def editEmployee(dictionary, unionDic, schedule):
     clear()
     print("Atenção, editar um funcionário pode invalidar alguns atributos previamente configurados.")
     res = input("Deseja continuar? (S/n)")
@@ -369,10 +418,19 @@ def editEmployee(dictionary, unionDic):
                 changeEmployeeType(dictionary, key)
             elif (option == 3):
                 changeUnionStatus(dictionary, key, unionDic)
+            elif (option == 4):
+                payoption = shedulePaymentOptions()
+                if (payoption > 3):
+                    print("Cancelado")
+                else:
+                    changePaymentSchedule(payoption, key, schedule)
+                    print("Agenda alterada com sucesso.")
+
     else:
         print("Cancelando...")
+#end of edit block
 
-def openPayRoll(employeeDict, unionDict):
+def openPayRoll(employeeDict, unionDict, payrollSchedule):
         while True:
             menuoption = menu()
             
@@ -381,11 +439,37 @@ def openPayRoll(employeeDict, unionDict):
                 value = getId()
                 employeeOption = employeeChoose()
                 if (employeeOption != 0):
+                    newEmployee = addEmployee(employeeOption)
+
+                    if (employeeOption == 1):
+                        try:
+                            payrollSchedule['weekly'].add(value)
+                        except KeyError:
+                            payrollSchedule['weekly'] = {value}
+
+                    if (employeeOption == 2):
+                        try:
+                            payrollSchedule['monthly'].add(value)
+                        except KeyError:
+                            payrollSchedule['monthly'] = {value}
 
                     if (employeeOption == 3):
+                        try:
+                            payrollSchedule['bi-weekly'].add(value)
+                        except KeyError:
+                            payrollSchedule['bi-weekly'] = {value}
                         individualDict['sales'] = []
+
+                    paymentOption  = choosePaymentMethod()
+                    if paymentOption == 1:
+                        newEmployee.setPaymentMethod('Deposito em conta')
+                    elif paymentOption == 2:
+                        newEmployee.setPaymentMethod('Cheque em maos')
+                    elif paymentOption == 3:
+                        newEmployee.setPaymentMethod('Cheque pelos correios')
                     
-                    individualDict['worker'] = addEmployee(employeeOption)
+                    individualDict['worker'] = newEmployee
+                    #individualDict['worker'] = addEmployee(employeeOption)
                     
                         
                     unionOption = input("Deseja entrar no sindicato? (S/N)")
@@ -412,7 +496,7 @@ def openPayRoll(employeeDict, unionDict):
                 employeeStats(employeeDict) 
 
             elif menuoption == 4:
-                findEmployee(employeeDict, unionDict)
+                findEmployee(employeeDict, unionDict, payrollSchedule)
 
             elif menuoption == 5:
                 addToUnion(employeeDict, unionDict)
@@ -438,19 +522,32 @@ def openPayRoll(employeeDict, unionDict):
                 sendUnionFee(employeeDict, unionDict)
 
             elif menuoption == 10:
-                editEmployee(employeeDict, unionDict)
+                editEmployee(employeeDict, unionDict, payrollSchedule)
 
             else:
                 print("Saindo...")
                 break
 
-
+#runs the payments begin:
+def runPayRoll(employeeDict, unionDict):
+    global today
 
 def main():
     employeeDict = {}
     unionDict = {}
+    payrollSchedule = {}
+    payrollSchedule['weekly'] = set()
+    payrollSchedule['bi-weekly'] = set()
+    payrollSchedule['monthly'] = set()
 
-    openPayRoll(employeeDict, unionDict)
+    openPayRoll(employeeDict, unionDict, payrollSchedule)
+    # date1 = dt.datetime(2020,4,4)
+    # date2 = dt.datetime(2021,5,23)
+
+    # k1 = Hourly("Rafa", "Matao", 500)
+    # k1.PaymentVoucher(date1)
+    # k1.PaymentVoucher(date2)
+    #k1.PrintLastPaymentVoucher()
 
 
     
