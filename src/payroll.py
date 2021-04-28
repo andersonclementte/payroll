@@ -4,6 +4,9 @@ from employees.hourly import Hourly
 from employees.salaried import Salaried, Comissioned
 from employees.salesReport import SalesReport
 from union.union import Union
+from payment.accountdeposit import AccountDeposit
+from payment.mailcheck import MailCheck
+from payment.cashcheck import CashCheck
 from os import system
 
 #global variables and stuff
@@ -32,7 +35,7 @@ def menu():
     print("(1) - Adicionar Funcionário")
     print("(2) - Remover Funcionário")
     print("(3) - Exibir quantidade de funcionários cadastrados")
-    print("(4) - Encontrar Funcionário por ID")
+    print("(4) - Ver dados individuais")
     print("(5) - Adicionar ao sindicato")
     print("(6) - Lançar cartão de ponto")
     print("(7) - Lançar resultado de vendas")
@@ -84,7 +87,7 @@ def insertComissioned():
     name = input("Digite o nome: ")
     address = input("Digite o endereço: ")
     salary = float(input("Digite o salario: "))
-    bonus = float(input("Digite o bônus: "))
+    bonus = float(input("Digite o bônus percentual (%): "))
     employee = Comissioned(name, address, salary, bonus)
     clear()
     return employee
@@ -100,22 +103,31 @@ def addEmployee(option):
     
     return employee
 #add employee end block
-
+#-----------------------
 #remove employee block
-def removeEmployee(dictionary):
+def removeFromSchedule(key, schedule):
+    if key in schedule['weekly']:
+        schedule['weekly'].remove(key)
+    if key in schedule['bi-weekly']:
+        schedule['bi-weekly'].remove(key)
+    if key in schedule['monthly']:
+        schedule['monthly'].remove(key)
+
+def removeEmployee(dictionary, schedule):
     clear()
     key = int(input("Digite o ID do funcionário: "))
     if (key not in dictionary):
         print("Id inválida, nenhum funcionário deletado.")
-        return dictionary
+        #return dictionary
     else:
         name = dictionary[key]['worker'].name
         deletedIds.append(key)
+        removeFromSchedule(key, schedule)
         del dictionary[key]
         print("Operação bem sucedida, funcionário {} deletado.".format(name))
-        return dictionary
+        #return dictionary
 #end of remove employee block
-
+#---------------------------
 #payment method block
 def choosePaymentMethod():
     clear()
@@ -139,7 +151,7 @@ def findEmployee(dictionary, uniondict, schedule):
     if (key not in dictionary):
         print("ID inválida.")
     else:
-        print("--------------------------------")
+        print("-----------------------------------")
         print(dictionary[key]['worker'])
         if (dictionary[key]['worker'].kind == 'Comissionado'):
             print("Sales report: {}".format(len(dictionary[key]['sales'])))
@@ -150,7 +162,10 @@ def findEmployee(dictionary, uniondict, schedule):
             print("Funcionário pago bi-semanalmente")
         elif key in schedule['monthly']:
             print("Funcionário pago mensalmente")
-        print("--------------------------------")
+        print("Forma de pagamento: {}".format(dictionary[key]['worker'].paymentMethod))
+        dictionary[key]['worker'].GetNetIncome()
+        dictionary[key]['worker'].PrintLastPayment()
+        print("-----------------------------------")
 
         print("Informações sindicais:")
         if ('unionKey' in dictionary[key]):
@@ -218,15 +233,15 @@ def showSaleReport(dictionary):
     if (key not in dictionary):
         print("ID inválida.")
         print("------------------------------")
-        return
     elif (dictionary[key]['worker'].kind != "Comissionado"):
         print("Id inválida, funcionário não comissionado.")
         print("------------------------------------------")
     else:
         print("Funcionário:",format(dictionary[key]['worker'].name))
         print("Resultados de vendas: %d" %len(dictionary[key]['sales']))
-        print("Ultimo resultado de venda: ")
-        print(dictionary[key]['sales'][-1])
+        if (len(dictionary[key]['sales']) > 0):
+            print("Ultimo resultado de venda: ")
+            print(dictionary[key]['sales'][-1])
         print("--------------------------")
 
 def addToUnion(dictionary, unionDic):
@@ -372,7 +387,7 @@ def changeUnionStatus(dictionary, key, unionDic):
         unionDic[unionId] = Union(unionId)
         print("Funcionario filiado ao sindicado. ID sindical numero {}". format(unionId))
 
-def shedulePaymentOptions():
+def schedulePaymentOptions():
     clear()
     print("Escolha uma opção:")
     print("(1) - Pagamento semanal")
@@ -382,24 +397,20 @@ def shedulePaymentOptions():
     ans = int(input())
     return ans
 
-def changePaymentSchedule(option, key, shedule):
-    if key in shedule['weekly']:
-        shedule['weekly'].remove(key)
-    if key in shedule['bi-weekly']:
-        shedule['bi-weekly'].remove(key)
-    if key in shedule['monthly']:
-        shedule['monthly'].remove(key)
+def changePaymentSchedule(option, key, schedule):
+    if key in schedule['weekly']:
+        schedule['weekly'].remove(key)
+    if key in schedule['bi-weekly']:
+        schedule['bi-weekly'].remove(key)
+    if key in schedule['monthly']:
+        schedule['monthly'].remove(key)
 
     if(option == 1):
-        shedule['weekly'].add(key)
+        schedule['weekly'].add(key)
     elif (option == 2):
-        shedule['bi-weekly'].add(key)
+        schedule['bi-weekly'].add(key)
     elif (option == 3):
-        shedule['monthly'].add(key)
-
-
-
-
+        schedule['monthly'].add(key)
 
 def editEmployee(dictionary, unionDic, schedule):
     clear()
@@ -419,7 +430,7 @@ def editEmployee(dictionary, unionDic, schedule):
             elif (option == 3):
                 changeUnionStatus(dictionary, key, unionDic)
             elif (option == 4):
-                payoption = shedulePaymentOptions()
+                payoption = schedulePaymentOptions()
                 if (payoption > 3):
                     print("Cancelado")
                 else:
@@ -447,13 +458,13 @@ def openPayRoll(employeeDict, unionDict, payrollSchedule):
                         except KeyError:
                             payrollSchedule['weekly'] = {value}
 
-                    if (employeeOption == 2):
+                    elif (employeeOption == 2):
                         try:
                             payrollSchedule['monthly'].add(value)
                         except KeyError:
                             payrollSchedule['monthly'] = {value}
 
-                    if (employeeOption == 3):
+                    elif (employeeOption == 3):
                         try:
                             payrollSchedule['bi-weekly'].add(value)
                         except KeyError:
@@ -490,7 +501,7 @@ def openPayRoll(employeeDict, unionDict, payrollSchedule):
 
 
             elif menuoption == 2:
-                removeEmployee(employeeDict)
+                removeEmployee(employeeDict, payrollSchedule)
 
             elif menuoption == 3:
                 employeeStats(employeeDict) 
@@ -526,11 +537,131 @@ def openPayRoll(employeeDict, unionDict, payrollSchedule):
 
             else:
                 print("Saindo...")
+                clear()
                 break
 
 #runs the payments begin:
-def runPayRoll(employeeDict, unionDict):
+def checkIfFriday(day):
+    if (day.weekday() == 4):
+        return True
+    else:
+        return False
+
+def checkLastWorkDay(day):
+    thimonth = day.month
+    nextmonth = thimonth+1
+    tomorrow = day + dt.timedelta(days=1)
+    nextMonday = day + dt.timedelta(days=3)
+    if (day.weekday() >= 0 and day.weekday() <= 4 and tomorrow.month == nextmonth):
+        return True
+    elif (day.weekday() >= 0 and day.weekday() <= 4 and nextMonday.month == nextmonth):
+        return True
+    else:
+        return False
+
+def calcPaymentValue(dictionary, unionDict, key):
+    if(dictionary[key]['worker'].kind == 'Horista'):
+        result = dictionary[key]['worker'].GetIncome()
+        print("Rendimentos: R${}".format(result))
+    elif(dictionary[key]['worker'].kind == 'Assalariado'):
+        result = dictionary[key]['worker'].GetIncome()
+        print("Rendimentos: R${}".format(result))
+    elif(dictionary[key]['worker'].kind == 'Comissionado'):
+        result = dictionary[key]['worker'].GetIncome(dictionary[key]['sales'])
+        print("Rendimentos: R${}".format(result))
+
+    if ('unionKey' in dictionary[key]):
+        fee = unionDict[ dictionary[key]['unionKey'] ].getFee()
+        return result - fee
+    else:
+        return result
+
+def payEmployees(dictionary, unionDic, schedule, day):
+    if len(dictionary) == 0:
+        print("Não há funcionários para serem pagos")
+    elif (day.weekday() > 4):
+        print("É fim de semana, nenhum pagamento feito.")
+    else:
+        print("Vendo se é sexta")
+        if (checkIfFriday(day)):
+            for key in schedule['weekly']:  #weekly payment
+                payment = calcPaymentValue(dictionary, unionDic, key)
+                if (dictionary[key]['worker'].paymentMethod == 'Deposito em conta'):
+                    deposit = AccountDeposit(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(deposit)
+                    print("Pagamento semanal efetuado")
+
+                elif (dictionary[key]['worker'].paymentMethod == 'Cheque em maos'):
+                    check = CashCheck(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(check)
+                    print("Pagamento semanal efetuado")
+
+                elif (dictionary[key]['worker'].paymentMethod == 'Cheque pelos correios'):
+                    check = MailCheck(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(check)
+                    print("Pagamento semanal efetuado")
+
+            for key in schedule['bi-weekly']:   #bi-weekly payment
+                payment = calcPaymentValue(dictionary, unionDic, key)
+                lastPayment = dictionary[key]['worker'].GetLastPaymentDay()
+                print("id: {}".format(key))
+                print("pagamento: R${}".format(payment))
+                print("ultimo pagamento: R${}".format(lastPayment))
+                if (lastPayment == None or (today - lastPayment) >= 14):
+                    if (dictionary[key]['worker'].paymentMethod == 'Deposito em conta'):
+                        deposit = AccountDeposit(dictionary[key]['worker'].name, payment, day)
+                        dictionary[key]['worker'].PutInWallet(deposit)
+                        print("Pagamento bi-semanal efetuado")
+                    elif (dictionary[key]['worker'].paymentMethod == 'Cheque em maos'):
+                        check = CashCheck(dictionary[key]['worker'].name, payment, day)
+                        dictionary[key]['worker'].PutInWallet(check)
+                        print("Pagamento bi-semanal efetuado")
+                    elif (dictionary[key]['worker'].paymentMethod == 'Cheque pelos correios'):
+                        check = MailCheck(dictionary[key]['worker'].name, payment, day)
+                        dictionary[key]['worker'].PutInWallet(check)
+                        print("Pagamento bi-semanal efetuado")
+        print("vendo se é ultimo dia util")
+        if(checkLastWorkDay(day)):
+             for key in schedule['monthly']:  #weekly payment
+                payment = calcPaymentValue(dictionary, unionDic, key)
+
+                if (dictionary[key]['worker'].paymentMethod == 'Deposito em conta'):
+                    deposit = AccountDeposit(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(deposit)
+                    print("Pagamento mensal efetuado")
+
+                elif (dictionary[key]['worker'].paymentMethod == 'Cheque em maos'):
+                    check = CashCheck(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(check)
+                    print("Pagamento mensal efetuado")
+
+                elif (dictionary[key]['worker'].paymentMethod == 'Cheque pelos correios'):
+                    check = MailCheck(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(check)
+                    print("Pagamento mensal efetuado")
+
+
+        
+
+def runPayRoll(employeeDict, unionDict, schedule):
     global today
+    payEmployees(employeeDict, unionDict, schedule, today)
+    today += dt.timedelta(days=1)
+
+def mainMenuOptions():
+    print("(1) - Abrir folha de pagamento")
+    print("(2) - Rodar folha de pagamento")
+    print("(9) - Fechar programa")
+    ans = int(input())
+    print("---------------------------------------------")
+    return ans
+
+# def mainMenu():
+#     while True:
+#         menuOption = mainMenu()
+#         if (menuOption == 1):
+#             openPayRoll()
+
 
 def main():
     employeeDict = {}
@@ -540,8 +671,27 @@ def main():
     payrollSchedule['bi-weekly'] = set()
     payrollSchedule['monthly'] = set()
 
-    openPayRoll(employeeDict, unionDict, payrollSchedule)
-    # date1 = dt.datetime(2020,4,4)
+    while True:
+        print("---------------------------------------------")
+        print("Bem vindo.\nData do sistema: {:%A, %d %b %Y}.".format(today) )
+        menuOption = mainMenuOptions()
+        if (menuOption == 1):
+            openPayRoll(employeeDict, unionDict, payrollSchedule)
+        elif (menuOption == 2):
+            runPayRoll(employeeDict, unionDict, payrollSchedule)
+        elif (menuOption == 9):
+            print("Saindo...")
+            break
+        else:
+            clear()
+            continue
+
+    #openPayRoll(employeeDict, unionDict, payrollSchedule)
+    #runPayRoll(employeeDict, unionDict, schedule)
+
+
+    # date1 = dt.datetime(2021,4,30)
+    # checkLastWorkDay(date1)
     # date2 = dt.datetime(2021,5,23)
 
     # k1 = Hourly("Rafa", "Matao", 500)
