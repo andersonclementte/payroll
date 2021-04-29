@@ -88,6 +88,12 @@ class Comissioned(Salaried):
             income = ((self._bonus)/100)*balance + self._salary
             return income
 
+    def GetSalary(self):
+        return self._salary
+    
+    def GetBonus(self):
+        return self._bonus
+
     def PutInWallet(self, payment):
         self.wallet.append(payment)
 

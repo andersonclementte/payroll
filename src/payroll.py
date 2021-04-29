@@ -14,7 +14,7 @@ clear = lambda: system('clear')
 deletedIds = []
 lastId = 0
 unionID = 0
-today = dt.datetime(2021,1,1)
+today = dt.datetime(2021,1,28)
 
 #Add employee block
 def getId():
@@ -42,7 +42,7 @@ def menu():
     print("(8) - Ver resultado de venda")
     print("(9) - Lançar taxa de serviço")
     print("(10) - Editar funcionário")
-    print("(0) - Sair")
+    print("(0) - Voltar")
     ans = int(input())
     return ans
 
@@ -562,13 +562,19 @@ def checkLastWorkDay(day):
 def calcPaymentValue(dictionary, unionDict, key):
     if(dictionary[key]['worker'].kind == 'Horista'):
         result = dictionary[key]['worker'].GetIncome()
-        print("Rendimentos: R${}".format(result))
+        #print("Rendimentos: R${}".format(result))
     elif(dictionary[key]['worker'].kind == 'Assalariado'):
         result = dictionary[key]['worker'].GetIncome()
-        print("Rendimentos: R${}".format(result))
+        #print("Rendimentos: R${}".format(result))
     elif(dictionary[key]['worker'].kind == 'Comissionado'):
-        result = dictionary[key]['worker'].GetIncome(dictionary[key]['sales'])
-        print("Rendimentos: R${}".format(result))
+        salary = dictionary[key]['worker'].GetSalary()
+        bonusPercentage = (dictionary[key]['worker'].GetBonus())/100
+        salesResult = 0
+        for sale in dictionary[key]['sales']:
+            salesResult += sale.value
+        dictionary[key]['sales'].clear()
+        result = bonusPercentage*salesResult + salary
+        #print("Rendimentos: R${}".format(result))
 
     if ('unionKey' in dictionary[key]):
         fee = unionDict[ dictionary[key]['unionKey'] ].getFee()
@@ -582,7 +588,7 @@ def payEmployees(dictionary, unionDic, schedule, day):
     elif (day.weekday() > 4):
         print("É fim de semana, nenhum pagamento feito.")
     else:
-        print("Vendo se é sexta")
+        #print("Vendo se é sexta")
         if (checkIfFriday(day)):
             for key in schedule['weekly']:  #weekly payment
                 payment = calcPaymentValue(dictionary, unionDic, key)
@@ -603,24 +609,19 @@ def payEmployees(dictionary, unionDic, schedule, day):
 
             for key in schedule['bi-weekly']:   #bi-weekly payment
                 payment = calcPaymentValue(dictionary, unionDic, key)
-                lastPayment = dictionary[key]['worker'].GetLastPaymentDay()
-                print("id: {}".format(key))
-                print("pagamento: R${}".format(payment))
-                print("ultimo pagamento: R${}".format(lastPayment))
-                if (lastPayment == None or (today - lastPayment) >= 14):
-                    if (dictionary[key]['worker'].paymentMethod == 'Deposito em conta'):
-                        deposit = AccountDeposit(dictionary[key]['worker'].name, payment, day)
-                        dictionary[key]['worker'].PutInWallet(deposit)
-                        print("Pagamento bi-semanal efetuado")
-                    elif (dictionary[key]['worker'].paymentMethod == 'Cheque em maos'):
-                        check = CashCheck(dictionary[key]['worker'].name, payment, day)
-                        dictionary[key]['worker'].PutInWallet(check)
-                        print("Pagamento bi-semanal efetuado")
-                    elif (dictionary[key]['worker'].paymentMethod == 'Cheque pelos correios'):
-                        check = MailCheck(dictionary[key]['worker'].name, payment, day)
-                        dictionary[key]['worker'].PutInWallet(check)
-                        print("Pagamento bi-semanal efetuado")
-        print("vendo se é ultimo dia util")
+                if (dictionary[key]['worker'].paymentMethod == 'Deposito em conta'):
+                    deposit = AccountDeposit(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(deposit)
+                    print("Pagamento bi-semanal efetuado")
+                elif (dictionary[key]['worker'].paymentMethod == 'Cheque em maos'):
+                    check = CashCheck(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(check)
+                    print("Pagamento bi-semanal efetuado")
+                elif (dictionary[key]['worker'].paymentMethod == 'Cheque pelos correios'):
+                    check = MailCheck(dictionary[key]['worker'].name, payment, day)
+                    dictionary[key]['worker'].PutInWallet(check)
+                    print("Pagamento bi-semanal efetuado")
+        #print("vendo se é ultimo dia util")
         if(checkLastWorkDay(day)):
              for key in schedule['monthly']:  #weekly payment
                 payment = calcPaymentValue(dictionary, unionDic, key)
