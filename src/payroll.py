@@ -282,6 +282,7 @@ def editEmployeeOptions():
     print("(2) - Editar tipo de funcionário")
     print("(3) - Alterar vinculo sindical")
     print("(4) - Alterar agenda de pagamentos")
+    print("(5) - Alterar metodo de pagamento")
     print("(0) - Cancelar")
     ans = int(input())
     return ans
@@ -373,6 +374,45 @@ def changeEmployeeType(dictionary, key):
         else:
             print("Cancelando...")
 
+def changePaymentMethod(dictionary, key):
+    if (dictionary[key]['worker'].paymentMethod == 'Deposito em conta'):
+        print("Escolha o novo metodo de pagamento: ")
+        print("(1) - Cheque em maos")
+        print("(2) - Cheque pelos correios")
+        choose = int(input())
+        if (choose == 1):
+            dictionary[key]['worker'].setPaymentMethod('Cheque em maos')
+        elif (choose == 2):
+            dictionary[key]['worker'].setPaymentMethod('Cheque pelos correios')
+        else:
+            print("Cancelando...")
+        
+
+    elif (dictionary[key]['worker'].paymentMethod == 'Cheque em maos'):
+        print("Escolha o novo metodo de pagamento: ")
+        print("(1) - Deposito em conta")
+        print("(2) - Cheque pelos correios")
+        choose = int(input())
+        if (choose == 1):
+            dictionary[key]['worker'].setPaymentMethod('Deposito em conta')
+        elif (choose == 2):
+            dictionary[key]['worker'].setPaymentMethod('Cheque pelos correios')
+        else:
+            print("Cancelando...")
+        
+
+    elif (dictionary[key]['worker'].paymentMethod == 'Cheque pelos correios'):
+        print("Escolha o novo metodo de pagamento: ")
+        print("(1) - Cheque em maos")
+        print("(2) - Deposito em conta")
+        choose = int(input())
+        if (choose == 1):
+            dictionary[key]['worker'].setPaymentMethod('Cheque em maos')
+        elif (choose == 2):
+            dictionary[key]['worker'].setPaymentMethod('Deposito em conta')
+        else:
+            print("Cancelando...")
+
 def changeUnionStatus(dictionary, key, unionDic):
     if ('unionKey' in dictionary[key]): 
         unionID = dictionary[key]['unionKey']
@@ -436,6 +476,8 @@ def editEmployee(dictionary, unionDic, schedule):
                 else:
                     changePaymentSchedule(payoption, key, schedule)
                     print("Agenda alterada com sucesso.")
+            elif (option == 5):
+                changePaymentMethod(dictionary, key)
 
     else:
         print("Cancelando...")
@@ -589,7 +631,7 @@ def payEmployees(dictionary, unionDic, schedule, day):
         print("É fim de semana, nenhum pagamento feito.")
     else:
         #print("Vendo se é sexta")
-        if (checkIfFriday(day)):
+        if (checkIfFriday(day) or checkLastWorkDay(day)):
             for key in schedule['weekly']:  #weekly payment
                 payment = calcPaymentValue(dictionary, unionDic, key)
                 if (dictionary[key]['worker'].paymentMethod == 'Deposito em conta'):
@@ -622,8 +664,8 @@ def payEmployees(dictionary, unionDic, schedule, day):
                     dictionary[key]['worker'].PutInWallet(check)
                     print("Pagamento bi-semanal efetuado")
         #print("vendo se é ultimo dia util")
-        if(checkLastWorkDay(day)):
-             for key in schedule['monthly']:  #weekly payment
+        #if(checkLastWorkDay(day)):
+            for key in schedule['monthly']:  #weekly payment
                 payment = calcPaymentValue(dictionary, unionDic, key)
 
                 if (dictionary[key]['worker'].paymentMethod == 'Deposito em conta'):
@@ -640,6 +682,8 @@ def payEmployees(dictionary, unionDic, schedule, day):
                     check = MailCheck(dictionary[key]['worker'].name, payment, day)
                     dictionary[key]['worker'].PutInWallet(check)
                     print("Pagamento mensal efetuado")
+        else:
+            print("Nenhum pagamento agendado hoje.")
 
 
         
